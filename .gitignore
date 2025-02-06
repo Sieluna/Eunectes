@@ -57,3 +57,6 @@ node_modules
 # Editor directories and files
 .vscode/
 .idea/
+
+# wandb Cache
+wandb/

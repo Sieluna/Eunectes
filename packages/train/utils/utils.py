@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from munch import Munch
 from inspect import isfunction
-import contextlib
+from contextlib import contextmanager
 
 operators = '|'.join(['arccos', 'arcsin', 'arctan', 'arg', 'cos', 'cosh', 'cot', 'coth', 'csc', 'deg', 'det', 'dim', 'exp', 'gcd', 'hom', 'inf',
                       'injlim', 'ker', 'lg', 'lim', 'liminf', 'limsup', 'ln', 'log', 'max', 'min', 'Pr', 'projlim', 'sec', 'sin', 'sinh', 'sup', 'tan', 'tanh'])
@@ -145,8 +145,8 @@ def post_process(s: str):
         str: Processed image
     """
     text_reg = r'(\\(operatorname|mathrm|text|mathbf)\s?\*? {.*?})'
-    letter = '[a-zA-Z]'
-    noletter = '[\W_^\d]'
+    letter = r'[a-zA-Z]'
+    noletter = r'[\W_^\d]'
     names = [x[0].replace(' ', '') for x in re.findall(text_reg, s)]
     s = re.sub(text_reg, lambda match: str(names.pop(0)), s)
     news = s
@@ -185,10 +185,10 @@ def num_model_params(model):
     return sum([p.numel() for p in model.parameters()])
 
 
-@contextlib.contextmanager
+@contextmanager
 def in_model_path():
-    import packages.train.__main__ as __main__
-    model_path = os.path.join(os.path.dirname(__main__.__file__), 'model')
+    import train.__main__ as main_module
+    model_path = os.path.join(os.path.dirname(main_module.__file__), 'model')
     saved = os.getcwd()
     os.chdir(model_path)
     try:
