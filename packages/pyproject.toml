@@ -1,0 +1,39 @@
+[project]
+name = "monorepo"
+version = "0.1.0"
+dependencies = [
+    # Image Processing
+    "albumentations>=2.0",
+    "opencv-python-headless>=4.0",
+    "pillow>=11.0",
+    "imagesize>=1.4",
+
+    # Math
+    "numpy>=2.0",
+    "pandas>=2.0",
+
+    # Deep Learning Frameworks
+    "torch~=2.3.0",
+    "torchaudio~=2.3.0",
+    "torchtext~=0.18.0",
+    "torchvision~=0.18.0",
+    "timm>=1.0",
+
+    # Natural Language Processing
+    "transformers>=4.0",
+    "tokenizers>=0.21",
+    "x-transformers>=2.0",
+
+    # Utilities
+    "tqdm>=4.0",
+    "einops>=0.8",
+    "PyYAML>=6.0",
+    "requests>=2.0",
+    "munch>=4.0",
+    "pyreadline3>=3.0; sys_platform == 'win32'",
+    "python-Levenshtein>=0.26",
+    "wandb>=0.19"
+]
+
+[tool.setuptools]
+packages = ["train", "collector"]
