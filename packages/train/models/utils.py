@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 
 from . import hybrid
-from . import vit
 from . import transformer
+from . import vit
 
 
 class Model(nn.Module):

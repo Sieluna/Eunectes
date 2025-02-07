@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 
 from einops import rearrange, repeat
-from x_transformers import Encoder
+
+from .transformer import Encoder
 
 
 class ViTransformerWrapper(nn.Module):

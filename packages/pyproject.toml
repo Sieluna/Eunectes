@@ -9,6 +9,7 @@ dependencies = [
     "imagesize>=1.2",
 
     # Math
+    "entmax>=1.0",
     "numpy>=1.26",
     "pandas>=1.0",
 
@@ -22,7 +23,6 @@ dependencies = [
     # Natural Language Processing
     "transformers>=4.0",
     "tokenizers>=0.13",
-    "x-transformers==0.15",
 
     # Utilities
     "tqdm>=4.0",
