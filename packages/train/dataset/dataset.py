@@ -35,7 +35,8 @@ class Im2LatexDataset:
     data = defaultdict(lambda: [])
 
     def __init__(self, equations=None, images=None, tokenizer=None, shuffle=True, batchsize=16, max_seq_len=1024,
-                 max_dimensions=(1024, 512), min_dimensions=(32, 32), pad=False, keep_smaller_batches=False, test=False):
+                 max_dimensions=(1024, 512), min_dimensions=(32, 32), pad=False, keep_smaller_batches=False,
+                 test=False):
         """Generates a torch dataset from pairs of `equations` and `images`.
 
         Args:
@@ -91,7 +92,7 @@ class Im2LatexDataset:
             info = np.array(self.data[k], dtype=object)
             p = torch.randperm(len(info)) if self.shuffle else torch.arange(len(info))
             for i in range(0, len(info), self.batchsize):
-                batch = info[p[i:i+self.batchsize]]
+                batch = info[p[i:i + self.batchsize]]
                 if len(batch.shape) == 1:
                     batch = batch[None, :]
                 if len(batch) < self.batchsize and not self.keep_smaller_batches:
@@ -108,7 +109,7 @@ class Im2LatexDataset:
         if self.i >= self.size:
             raise StopIteration
         self.i += 1
-        return self.prepare_data(self.pairs[self.i-1])
+        return self.prepare_data(self.pairs[self.i - 1])
 
     def prepare_data(self, batch):
         """loads images into memory
@@ -147,7 +148,7 @@ class Im2LatexDataset:
             return None, None
         if self.pad:
             h, w = images.shape[2:]
-            images = F.pad(images, (0, self.max_dimensions[0]-w, 0, self.max_dimensions[1]-h), value=1)
+            images = F.pad(images, (0, self.max_dimensions[0] - w, 0, self.max_dimensions[1] - h), value=1)
         return tok, images
 
     def _get_size(self):
@@ -232,6 +233,7 @@ def generate_tokenizer(equations, output, vocab_size):
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser(description='Train model', add_help=False)
     parser.add_argument('-i', '--images', type=str, nargs='+', default=None, help='Image folders')
     parser.add_argument('-e', '--equations', type=str, nargs='+', default=None, help='equations text files')

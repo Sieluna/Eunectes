@@ -6,23 +6,12 @@ from x_transformers import Encoder
 
 
 class ViTransformerWrapper(nn.Module):
-    def __init__(
-        self,
-        *,
-        max_width,
-        max_height,
-        patch_size,
-        attn_layers,
-        channels=1,
-        num_classes=None,
-        dropout=0.,
-        emb_dropout=0.
-    ):
+    def __init__(self, *, max_width, max_height, patch_size, attn_layers, channels=1, num_classes=None, dropout=0., emb_dropout=0.):
         super().__init__()
         assert isinstance(attn_layers, Encoder), 'attention layers must be an Encoder'
         assert max_width % patch_size == 0 and max_height % patch_size == 0, 'image dimensions must be divisible by the patch size'
         dim = attn_layers.dim
-        num_patches = (max_width // patch_size)*(max_height // patch_size)
+        num_patches = (max_width // patch_size) * (max_height // patch_size)
         patch_dim = channels * patch_size ** 2
 
         self.patch_size = patch_size
@@ -36,7 +25,7 @@ class ViTransformerWrapper(nn.Module):
 
         self.attn_layers = attn_layers
         self.norm = nn.LayerNorm(dim)
-        #self.mlp_head = FeedForward(dim, dim_out = num_classes, dropout = dropout) if exists(num_classes) else None
+        # self.mlp_head = FeedForward(dim, dim_out = num_classes, dropout = dropout) if exists(num_classes) else None
 
     def forward(self, img, **kwargs):
         p = self.patch_size
@@ -47,9 +36,11 @@ class ViTransformerWrapper(nn.Module):
 
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b=b)
         x = torch.cat((cls_tokens, x), dim=1)
-        h, w = torch.tensor(img.shape[2:])//p
-        pos_emb_ind = repeat(torch.arange(h)*(self.max_width//p-w), 'h -> (h w)', w=w)+torch.arange(h*w)
-        pos_emb_ind = torch.cat((torch.zeros(1), pos_emb_ind+1), dim=0).long()
+
+        h, w = torch.tensor(img.shape[2:]) // p
+        pos_emb_ind = repeat(torch.arange(h) * (self.max_width // p - w), 'h -> (h w)', w=w) + torch.arange(h * w)
+        pos_emb_ind = torch.cat((torch.zeros(1), pos_emb_ind + 1), dim=0).long()
+
         x += self.pos_embedding[:, pos_emb_ind]
         x = self.dropout(x)
 

@@ -12,23 +12,23 @@ function createVenv() {
 }
 
 function activeVenv() {
-    const activatePath = path.resolve(VENV_PATH, `bin/${process.platform === "win32" ? "Activate.ps1" : "activate"}`);
+    const activatePath = path.resolve(VENV_PATH, process.platform === "win32" ? "Scripts/Activate.ps1" : "bin/activate");
 
     if (process.platform === "win32") {
-        execSync(activatePath, { stdio: "inherit" });
+        execSync(`powershell.exe "${activatePath}"`, { stdio: "inherit" });
     } else {
         execSync(`bash -c 'source "${activatePath}"'`, { stdio: "inherit" });
     }
 }
 
 function install() {
-    const pipPath = path.resolve(VENV_PATH, `bin/${process.platform === "win32" ? "pip.exe" : "pip"}`);
+    const pipPath = path.resolve(VENV_PATH, process.platform === "win32" ? "Scripts/pip.exe" : "bin/pip");
 
     execSync(`"${pipPath}" install -e "${WORKSPACE_PATH}"`, { stdio: "inherit" });
 }
 
 function execute(pkg) {
-    const pythonPath = path.resolve(VENV_PATH, `bin/${process.platform === "win32" ? "python.exe" : "python"}`);
+    const pythonPath = path.resolve(VENV_PATH, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
     const pkgPath = path.resolve(WORKSPACE_PATH, pkg);
 
     execSync(`"${pythonPath}" "${pkgPath}"`, { stdio: "inherit" });

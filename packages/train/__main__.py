@@ -36,7 +36,7 @@ def train(args):
         model.load_state_dict(torch.load(args.load_chkpt, map_location=device))
 
     def save_models(e, step=0):
-        torch.save(model.state_dict(), os.path.join(out_path, f'{args.name}_e{e+1:02d}_step{step:02d}.pth'))
+        torch.save(model.state_dict(), os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.pth'))
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         if args.export_onnx:
             onnx_path = os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.onnx')
@@ -49,7 +49,7 @@ def train(args):
                 (dummy_img, dummy_tgt_seq),
                 onnx_path,
                 export_params=True,
-                opset_version=12,
+                opset_version=14,
                 do_constant_folding=True,
                 input_names=["input", "tgt_seq"],
                 output_names=["output"],
@@ -71,8 +71,8 @@ def train(args):
                     opt.zero_grad()
                     total_loss = 0
                     for j in range(0, len(im), microbatch):
-                        tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
-                        loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
+                        tgt_seq, tgt_mask = (seq['input_ids'][j:j + microbatch].to(device), seq['attention_mask'][j:j + microbatch].bool().to(device))
+                        loss = model.data_parallel(im[j:j + microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask) * microbatch / args.batchsize
                         loss.backward()  # data parallism loss is a vector
                         total_loss += loss.item()
                         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
@@ -81,15 +81,15 @@ def train(args):
                     dset.set_description('Loss: %.4f' % total_loss)
                     if args.wandb:
                         wandb.log({'train/loss': total_loss})
-                if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    bleu_score, edit_distance, token_accuracy = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
+                if (i + 1 + len(dataloader) * e) % args.sample_freq == 0:
+                    bleu_score, edit_distance, token_accuracy = evaluate(model, valdataloader, args, num_batches=int(args.valbatches * e / args.epochs), name='val')
                     if bleu_score > max_bleu and token_accuracy > max_token_acc:
                         max_bleu, max_token_acc = bleu_score, token_accuracy
                         save_models(e, step=i)
-            if (e+1) % args.save_freq == 0:
+            if (e + 1) % args.save_freq == 0:
                 save_models(e, step=len(dataloader))
             if args.wandb:
-                wandb.log({'train/epoch': e+1})
+                wandb.log({'train/epoch': e + 1})
     except KeyboardInterrupt:
         if e >= 2:
             save_models(e, step=i)

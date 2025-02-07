@@ -26,14 +26,13 @@ class Model(nn.Module):
         outputs = nn.parallel.parallel_apply(replicas, inputs, kwargs)
         return nn.parallel.gather(outputs, output_device).mean()
 
-    def forward(self, x: torch.Tensor, tgt_seq: torch.Tensor,  **kwargs):
+    def forward(self, x: torch.Tensor, tgt_seq: torch.Tensor, **kwargs):
         encoded = self.encoder(x)
-        out = self.decoder(tgt_seq, context=encoded, **kwargs)
-        return out
+        return self.decoder(tgt_seq, context=encoded, **kwargs)
 
     @torch.no_grad()
     def generate(self, x: torch.Tensor, temperature: float = 0.25):
-        return self.decoder.generate((torch.LongTensor([self.args.bos_token]*len(x))[:, None]).to(x.device), self.args.max_seq_len,
+        return self.decoder.generate((torch.LongTensor([self.args.bos_token] * len(x))[:, None]).to(x.device), self.args.max_seq_len,
                                      eos_token=self.args.eos_token, context=self.encoder(x), temperature=temperature)
 
 
