@@ -34,6 +34,7 @@ min_width: 32
 min_height: 32
 channels: 1
 patch_size: 32
+
 # Encoder / Decoder
 dim: 128
 backbone_layers: 
@@ -56,10 +57,11 @@ encoder_structure: hybrid
 # Other
 seed: 42
 id: null
+export_onnx: true
 sample_freq: 50
 test_samples: 5
-debug: True
-pad: False
+debug: true
+pad: false
 
 # Token ids
 pad_token: 0

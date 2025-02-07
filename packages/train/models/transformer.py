@@ -1,7 +1,8 @@
 import torch
 import torch.nn.functional as F
-from x_transformers.autoregressive_wrapper import AutoregressiveWrapper, top_k, top_p
+
 from x_transformers import TransformerWrapper, Decoder
+from x_transformers.autoregressive_wrapper import AutoregressiveWrapper, top_k, top_p
 
 
 class CustomARWrapper(AutoregressiveWrapper):

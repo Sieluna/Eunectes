@@ -32,5 +32,3 @@ const [file, setFile] = setupUploader({
     element: document.querySelector("#upload"),
     onUpdate: setView
 });
-
-

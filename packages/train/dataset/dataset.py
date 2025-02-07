@@ -1,21 +1,21 @@
+import os
+import glob
+import logging
+import pickle
+from collections import defaultdict
+from os.path import join
+
+import numpy as np
+import cv2
+import imagesize
 import torch
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
-import numpy as np
-import imagesize
-import logging
-import glob
-import os
-from os.path import join
-from collections import defaultdict
-import pickle
-import cv2
-from transformers import PreTrainedTokenizerFast
 from tqdm.auto import tqdm
+from transformers import PreTrainedTokenizerFast
 
 from train.utils.utils import in_model_path
 from train.dataset.transforms import train_transform, test_transform
-
 
 
 class Im2LatexDataset:

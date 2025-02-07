@@ -3,7 +3,7 @@ name = "monorepo"
 version = "0.1.0"
 dependencies = [
     # Image Processing
-    "albumentations>=0.5,<=1.4",
+    "albumentations>=2.0",
     "opencv-python-headless>=4.0",
     "pillow>=9.0",
     "imagesize>=1.2",
@@ -30,6 +30,7 @@ dependencies = [
     "PyYAML>=5.0",
     "requests>=2.0",
     "munch>=2.0",
+    "onnx>=1.0",
     "pyreadline3>=3.0; sys_platform == 'win32'",
     "python-Levenshtein>=0.12",
     "wandb>=0.19"

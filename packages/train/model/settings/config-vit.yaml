@@ -18,6 +18,7 @@ emb_dropout: 0
 encoder_depth: 4
 eos_token: 2
 epochs: 10
+export_onnx: false
 gamma: 0.9995
 heads: 8
 id: null

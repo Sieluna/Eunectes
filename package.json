@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@huggingface/transformers": "latest",
     "codemirror": "latest",
-    "katex": "latest"
+    "katex": "latest",
+    "onnxruntime-web": "latest"
   },
   "devDependencies": {
     "vite": "latest"

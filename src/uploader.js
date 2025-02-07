@@ -1,20 +1,27 @@
-function simulatePix2Tex(imageFile) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const simulatedLatex = "\\frac{1}{2} \\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{4}";
-            resolve(simulatedLatex);
-        }, 10);
+import { LatexOCR } from "./latex-ocr.js";
+
+async function loadImage(file) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.src = URL.createObjectURL(file);
     });
 }
 
 export function setupUploader({ element, onUpdate } = {}) {
+    const ocr = new LatexOCR();
+    ocr.initialize().then(() => ocrReady = true);
+    let ocrReady = false;
     let file = null;
 
     const setFile = async (assets) => {
+        if (!ocrReady) return alert('Model loading...');
+
         file = assets[0];
         if (file) {
             try {
-                const latex = await simulatePix2Tex(file);
+                const image = await loadImage(e.target.files[0]);
+                const latex = await ocr.predict(image);
                 onUpdate(latex);
             } catch (error) {
                 console.error("Error processing image:", error);

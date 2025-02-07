@@ -1,13 +1,15 @@
-import random
 import os
-import cv2
+import random
 import re
-from PIL import Image
+from contextlib import contextmanager
+from inspect import isfunction
+
+import cv2
 import numpy as np
 import torch
+from PIL import Image
 from munch import Munch
-from inspect import isfunction
-from contextlib import contextmanager
+
 
 operators = '|'.join(['arccos', 'arcsin', 'arctan', 'arg', 'cos', 'cosh', 'cot', 'coth', 'csc', 'deg', 'det', 'dim', 'exp', 'gcd', 'hom', 'inf',
                       'injlim', 'ker', 'lg', 'lim', 'liminf', 'limsup', 'ln', 'log', 'max', 'min', 'Pr', 'projlim', 'sec', 'sin', 'sinh', 'sup', 'tan', 'tanh'])

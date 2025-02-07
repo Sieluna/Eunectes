@@ -10,6 +10,7 @@ import torch.onnx
 from munch import Munch
 from tqdm import tqdm
 import wandb
+
 from train.dataset.dataset import Im2LatexDataset
 from train.eval import evaluate
 from train.models import get_model
@@ -40,14 +41,18 @@ def train(args):
         if args.export_onnx:
             onnx_path = os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.onnx')
             model.eval()
-            dummy_input = torch.randn(1, 3, 128, 128).to(device)
+            dummy_seq_len = 20
+            dummy_img = torch.randn(1, args.channels, args.min_height, args.min_width).to(device)
+            dummy_tgt_seq = torch.randint(0, args.num_tokens, (1, dummy_seq_len)).to(device)
             torch.onnx.export(
-                model, dummy_input, onnx_path,
+                model,
+                (dummy_img, dummy_tgt_seq),
+                onnx_path,
                 export_params=True,
-                opset_version=11,
+                opset_version=12,
                 do_constant_folding=True,
-                input_names=["input"],
-                output_names=["output"]
+                input_names=["input", "tgt_seq"],
+                output_names=["output"],
             )
 
     opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)

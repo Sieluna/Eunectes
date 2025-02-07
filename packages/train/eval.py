@@ -1,4 +1,3 @@
-from train.dataset.dataset import Im2LatexDataset
 import argparse
 import logging
 import yaml
@@ -10,7 +9,7 @@ from munch import Munch
 from tqdm.auto import tqdm
 import wandb
 from Levenshtein import distance
-
+from train.dataset.dataset import Im2LatexDataset
 from train.models import get_model, Model
 from train.utils import *
 
