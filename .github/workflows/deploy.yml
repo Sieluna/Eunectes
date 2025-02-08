@@ -32,6 +32,10 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          MODEL_URL: ${{ vars.MODEL_URL }}
+          TOKENIZER_URL: ${{ vars.TOKENIZER_URL }}
+          TOKENIZER_CONFIG_URL: ${{ vars.TOKENIZER_CONFIG_URL }}
         run: npm run build
 
       - name: Setup Pages
