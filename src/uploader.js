@@ -20,7 +20,7 @@ export function setupUploader({ element, onUpdate } = {}) {
         file = assets[0];
         if (file) {
             try {
-                const image = await loadImage(e.target.files[0]);
+                const image = await loadImage(file);
                 const latex = await ocr.predict(image);
                 onUpdate(latex);
             } catch (error) {
