@@ -1,7 +1,6 @@
 import katex from "katex";
 
 export function setupPreview({ element } = {}) {
-
     const setPreview = (content) => {
         try {
             katex.render(content, element, {
@@ -13,5 +12,7 @@ export function setupPreview({ element } = {}) {
         }
     };
 
-    return [{}, setPreview];
+    return {
+        next: setPreview
+    };
 }

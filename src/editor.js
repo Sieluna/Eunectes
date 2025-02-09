@@ -1,12 +1,16 @@
 import { basicSetup, EditorView } from "codemirror";
 
-export function setupEditor({ element, onUpdate } = {}) {
+export function setupEditor({ element } = {}) {
+    const subscribers = new Set();
+
     let view = new EditorView({
         extensions: [
             basicSetup,
             EditorView.updateListener.of((update) => {
                 if (update.docChanged) {
-                    onUpdate(view.state.doc.toString());
+                    subscribers.forEach(subscriber => {
+                        subscriber(view.state.doc.toString());
+                    });
                 }
             })
         ],
@@ -23,5 +27,11 @@ export function setupEditor({ element, onUpdate } = {}) {
         });
     };
 
-    return [view, setView];
+    return {
+        next: setView,
+        subscribe: (callback) => {
+            subscribers.add(callback);
+            return () => subscribers.delete(callback);
+        }
+    };
 }

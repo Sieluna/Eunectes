@@ -8,21 +8,21 @@ async function loadImage(file) {
     });
 }
 
-export function setupUploader({ element, onUpdate } = {}) {
+export function setupUploader({ element } = {}) {
+    const subscribers = new Set();
     const ocr = new LatexOCR();
     ocr.initialize().then(() => ocrReady = true);
     let ocrReady = false;
-    let file = null;
 
     const setFile = async (assets) => {
         if (!ocrReady) return alert('Model loading...');
 
-        file = assets[0];
+        const file = assets[0];
         if (file) {
             try {
                 const image = await loadImage(file);
                 const latex = await ocr.predict(image);
-                onUpdate(latex);
+                subscribers.forEach(subscriber => subscriber(latex));
             } catch (error) {
                 console.error("Error processing image:", error);
             }
@@ -31,5 +31,10 @@ export function setupUploader({ element, onUpdate } = {}) {
 
     element.addEventListener("change", async (event) => setFile(event.target.files));
 
-    return [file, setFile];
+    return {
+        subscribe: (callback) => {
+            subscribers.add(callback);
+            return () => subscribers.delete(callback);
+        }
+    };
 }

@@ -41,9 +41,8 @@ def train(args):
         if args.export_onnx:
             onnx_path = os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.onnx')
             model.eval()
-            dummy_seq_len = 20
-            dummy_img = torch.randn(1, args.channels, args.min_height, args.min_width).to(device)
-            dummy_tgt_seq = torch.randint(0, args.num_tokens, (1, dummy_seq_len)).to(device)
+            dummy_img = torch.randn(1, args.channels, args.max_height, args.max_width).to(device)
+            dummy_tgt_seq = torch.randint(0, args.num_tokens, (1, args.max_seq_len)).to(device)
             torch.onnx.export(
                 model,
                 (dummy_img, dummy_tgt_seq),
@@ -51,8 +50,13 @@ def train(args):
                 export_params=True,
                 opset_version=14,
                 do_constant_folding=True,
-                input_names=["input", "tgt_seq"],
-                output_names=["output"],
+                input_names=['input', 'tgt_seq'],
+                output_names=['output'],
+                dynamic_axes={
+                    'input': {0: 'batch_size'},
+                    'tgt_seq': {0: 'batch_size', 1: 'seq_len'},
+                    'output': {0: 'batch_size', 1: 'seq_len'}
+                }
             )
 
     opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
