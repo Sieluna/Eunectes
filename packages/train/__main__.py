@@ -39,13 +39,15 @@ def train(args):
         torch.save(model.state_dict(), os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.pth'))
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         if args.export_onnx:
+            import onnx
             onnx_path = os.path.join(out_path, f'{args.name}_e{e + 1:02d}_step{step:02d}.onnx')
             model.eval()
             dummy_img = torch.randn(1, args.channels, args.max_height, args.max_width).to(device)
-            dummy_tgt_seq = torch.randint(0, args.num_tokens, (1, args.max_seq_len)).to(device)
+            dummy_tgt = torch.full((1, args.max_seq_len), args.pad_token, dtype=torch.long).to(device)
+            dummy_tgt[:, 0] = args.bos_token
             torch.onnx.export(
                 model,
-                (dummy_img, dummy_tgt_seq),
+                (dummy_img, dummy_tgt),
                 onnx_path,
                 export_params=True,
                 opset_version=14,
@@ -58,6 +60,12 @@ def train(args):
                     'output': {0: 'batch_size', 1: 'seq_len'}
                 }
             )
+            onnx_model = onnx.load(onnx_path)
+            meta = onnx_model.metadata_props.add()
+            meta.key = 'vocab_size'
+            meta.value = str(args.num_tokens)
+            onnx.checker.check_model(onnx_model)
+            onnx.save(onnx_model, onnx_path)
 
     opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
     scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)

@@ -14,9 +14,9 @@ export class LatexOCR {
         max_seq_len: 256,
         temperature: 0.25,
         channels: 1,
-        bos_token: 0,
-        eos_token: 1,
-        pad_token: 2
+        pad_token: 0,
+        bos_token: 1,
+        eos_token: 2
     };
 
     async initialize({
@@ -44,12 +44,12 @@ export class LatexOCR {
     }
 
     async predict(element) {
-        const processed = await this.#preprocessImage(element);
+        const processed = await this.#preprocess(element);
         const outputs = await this.#inference(processed);
         return this.#postProcess(outputs);
     }
 
-    async #preprocessImage(element) {
+    async #preprocess(element) {
         const canvas = document.createElement("canvas");
         canvas.width = element.naturalWidth;
         canvas.height = element.naturalHeight;
@@ -87,20 +87,20 @@ export class LatexOCR {
         };
 
         function minmaxSize(canvas, min, max) {
-            const [[minW, minH], [maxW, maxH]] = [min, max];
+            const [[minWidth, minHeight], [maxWidth, maxHeight]] = [min, max];
 
-            const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
-            const [scaledW, scaledH] = [
-                Math.max(minW, Math.min(maxW, canvas.width * scale)),
-                Math.max(minH, Math.min(maxH, canvas.height * scale))
+            const scale = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
+            const [scaledWidth, scaledHeight] = [
+                Math.max(minWidth, Math.min(maxWidth, canvas.width * scale)),
+                Math.max(minHeight, Math.min(maxHeight, canvas.height * scale))
             ];
 
             const scaledCanvas = document.createElement("canvas");
-            scaledCanvas.width = scaledW;
-            scaledCanvas.height = scaledH;
+            scaledCanvas.width = scaledWidth;
+            scaledCanvas.height = scaledHeight;
 
             const ctx = scaledCanvas.getContext("2d");
-            ctx.drawImage(canvas, 0, 0, scaledW, scaledH);
+            ctx.drawImage(canvas, 0, 0, scaledWidth, scaledHeight);
 
             return scaledCanvas;
         }
@@ -119,7 +119,7 @@ export class LatexOCR {
             const xOffset = (maxWidth - width) / 2;
             const yOffset = (maxHeight - height) / 2;
 
-            paddedCtx.drawImage(canvas, xOffset, yOffset);
+            paddedCtx.drawImage(canvas, xOffset, yOffset, width, height);
 
             return paddedCanvas;
         }
@@ -127,30 +127,20 @@ export class LatexOCR {
 
     async #inference(processed) {
         const inputTensor = new Tensor("float32", processed.data, processed.shape);
-        const tgtSeqBuffer = [BigInt(this.#args.bos_token)];
-        let outputs = [];
+        const tokenBuffer = new BigInt64Array(this.#args.max_seq_len).fill(BigInt(this.#args.pad_token));
+        tokenBuffer[0] = BigInt(this.#args.bos_token);
 
-        for (let i = 0; i < this.#args.max_seq_len; i++) {
-            const tgtTensor = new Tensor("int64", new BigInt64Array(tgtSeqBuffer), [1, tgtSeqBuffer.length]);
+        for (let i = 1; i < this.#args.max_seq_len; i++) {
+            const tgtSeqTensor = new Tensor("int64", new BigInt64Array(tokenBuffer), [1, this.#args.max_seq_len]);
 
-            const result = await this.#model.run({
-                input: inputTensor,
-                tgt_seq: tgtTensor
-            });
+            const { output } = await this.#model.run({ input: inputTensor, tgt_seq: tgtSeqTensor });
+            const nextToken = sampleFromLogits(output.data, this.#args.temperature);
+            if (nextToken === this.#args.eos_token) break;
 
-            const logits = result.output.data;
-            const nextToken = sampleFromLogits(logits, this.#args.temperature);
-
-            console.log(`Step ${i}: Token ${nextToken}`);
-            outputs.push(nextToken);
-            tgtSeqBuffer.push(BigInt(nextToken));
-
-            if (nextToken === this.#args.eos_token) {
-                break;
-            }
+            tokenBuffer[i] = BigInt(nextToken);
         }
 
-        return outputs;
+        return tokenBuffer;
 
         function sampleFromLogits(logits, temperature) {
             const scaled = Array.from(logits).map(x => x / temperature);
