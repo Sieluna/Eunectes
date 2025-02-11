@@ -30,7 +30,7 @@ export class LatexOCR {
             fetch(modelUrl)
                 .then(res => res.arrayBuffer())
                 .then(buffer => InferenceSession.create(buffer, {
-                    executionProviders: ["webgpu"]
+                    executionProviders: ["wasm"]
                 })),
             Promise.all([
                 fetch(tokenizerUrl).then(res => res.json()),
@@ -46,7 +46,14 @@ export class LatexOCR {
     async predict(element) {
         const processed = await this.#preprocess(element);
         const outputs = await this.#inference(processed);
-        return this.#postProcess(outputs);
+        return {
+            latex: this.#postProcess(outputs),
+            meta: {
+                processed: processed.data,
+                shape: processed.shape,
+                tokens: outputs
+            }
+        };
     }
 
     async #preprocess(element) {

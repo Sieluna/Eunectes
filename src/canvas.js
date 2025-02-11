@@ -1,14 +1,31 @@
 import katex from "katex";
 
 export function setupPreview({ element } = {}) {
-    const setPreview = (content) => {
+    const originalImgElement = Object.assign(document.createElement("img"), { className: "preview" });
+    const prepareImgElement = Object.assign(document.createElement("img"), { className: "preview" });
+    const paramsElement = Object.assign(document.createElement("div"), { className: "params" });
+    const latexElement = Object.assign(document.createElement("div"), { className: "latex" });
+
+    element.prepend(originalImgElement, prepareImgElement, paramsElement, latexElement);
+
+    const setPreview = ({ latex, meta: { original, processed, shape, tokens } }) => {
         try {
-            katex.render(content, element, {
+            originalImgElement.src = original;
+            prepareImgElement.src = processed;
+            paramsElement.textContent = `
+                <p>${shape}</p>
+                <p>${tokens}</p>
+            `;
+        } catch (error) {
+        }
+
+        try {
+            katex.render(latex, latexElement, {
                 throwOnError: false,
                 output: "mathml"
             });
         } catch (error) {
-            element.textContent = error.message;
+            latexElement.textContent = error.message;
         }
     };
 

@@ -1,44 +1,149 @@
 :root {
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    color-scheme: light dark;
+    color: var(--bg-color);
+    background-color: var(--text-color);
+
     --primary-color: #007bff;
     --border-color: #ccc;
     --text-color: #333;
     --bg-color: #fff;
 
-    font-family: Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-
-    color-scheme: light dark;
-    color: var(--bg-color);
-    background-color: var(--text-color);
+    --sidebar-width: 300px;
 }
 
 body {
     margin: 0;
-    display: flex;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh;
 }
 
 #app {
+    display: flex;
     width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
+    min-width: 320px;
+    height: 100%;
+    min-height: 100vh;
+
+    & > nav {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        overflow: hidden auto;
+        width: var(--sidebar-width);
+        height: 100vh;
+        transition: margin-left 0.3s, box-shadow 0.2s;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+
+        & > header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+
+            & > button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.5rem;
+                cursor: pointer;
+                transition: left 0.15s;
+                border-radius: 6px;
+
+                & > svg {
+                    width: 1rem;
+                    height: 1rem;
+                }
+            }
+        }
+    }
+
+    & > main {
+        display: grid;
+        width: calc(100% - var(--sidebar-width));
+        margin-left: var(--sidebar-width);
+        padding: 1rem;
+        transition: margin-left 0.3s, width 0.3s;
+        gap: 0.5rem;
+
+        & > .editor-section {
+            display: grid;
+            gap: 0.5rem
+        }
+    }
+
+    & > nav.collapsed {
+        margin-left: calc(-1 * var(--sidebar-width));
+        box-shadow: none;
+
+        & + main {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
 }
 
-.editor-section {
-    display: grid;
-    gap: 0.5rem;
+
+#history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    & > .history-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+    }
+}
+
+#upload {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 200px;
+    transition: border-color 0.2s ease;
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+
+    & > input {
+        display: none;
+    }
+
+    & > label {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        cursor: pointer;
+        text-align: center;
+
+        svg {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        span {
+            font-size: 1.1rem;
+            padding: 8px;
+            color: var(--text-color);
+        }
+    }
+
+    &:hover,
+    &.is-dragover {
+        border-color: var(--primary-color);
+        background-color: rgba(0, 123, 255, 0.05);
+    }
 }
 
 #editor,
 #preview {
-    border: 1px solid var(--border-color);
-    border-radius: 0.25rem;
     overflow: hidden scroll;
     min-height: 60vh;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
 }
 
 @media (prefers-color-scheme: light) {
